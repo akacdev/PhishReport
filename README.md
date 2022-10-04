@@ -11,7 +11,7 @@
 <br>
 
 > **Warning**<br>
-> The Phish.Report API is still under development, so in the event that you start experiencing an unexpected errors, first check if there's an update available or raise an issue in this repository.
+> The Phish.Report API is still under development, so in the event that you start experiencing unexpected errors, first check if there's an update available or raise an issue in this repository.
 
 ## Usage
 Available on NuGet as `PhishReport`, methods can be found under the class `PhishReportClient`.<br/>
