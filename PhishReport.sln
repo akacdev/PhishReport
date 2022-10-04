@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhishReport", "PhishReport\PhishReport.csproj", "{2CEBE067-05B9-4049-B6A8-D84B19C75261}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{B854991C-4615-44E7-A0D6-C6FB3CF5EAF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2CEBE067-05B9-4049-B6A8-D84B19C75261}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CEBE067-05B9-4049-B6A8-D84B19C75261}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CEBE067-05B9-4049-B6A8-D84B19C75261}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CEBE067-05B9-4049-B6A8-D84B19C75261}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B854991C-4615-44E7-A0D6-C6FB3CF5EAF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B854991C-4615-44E7-A0D6-C6FB3CF5EAF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B854991C-4615-44E7-A0D6-C6FB3CF5EAF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B854991C-4615-44E7-A0D6-C6FB3CF5EAF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FAB38420-73BB-4A6C-89B2-40FA9C8BB92F}
+	EndGlobalSection
+EndGlobal
