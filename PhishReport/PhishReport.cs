@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace PhishReport
 {
@@ -22,6 +24,22 @@ namespace PhishReport
         /// The base URI for the API.
         /// </summary>
         public static readonly Uri BaseUri = new(BaseUrl);
+        /// <summary>
+        /// How often Indicator of Kit matches should be polled for changes.
+        /// </summary>
+        public const int IoKPollInterval = 1000 * 60;
+        /// <summary>
+        /// Low priority Indicators of Kit.
+        /// </summary>
+        public static readonly string[] LowPriorityIndicators = new string[]
+        {
+            "hex-encoded-body",
+            "base64-encoded-body",
+            "httrack",
+            "recaptcha",
+            "webscrapbook-cloner",
+            "savepage-we"
+        };
 
         private readonly HttpClientHandler HttpHandler = new()
         {
@@ -30,6 +48,27 @@ namespace PhishReport
         };
 
         private readonly HttpClient Client;
+
+        private EventHandler<IoKMatch> IoKHandler;
+        /// <summary>
+        /// Triggers whenever a new scan on Urlscan matches one of the kit indicators.
+        /// </summary>
+        public event EventHandler<IoKMatch> IoKMatched
+        {
+            add
+            {
+                IoKHandler += value;
+                if (IoKHandler.GetInvocationList().Length == 1) StartPolling();
+            }
+            remove
+            {
+                IoKHandler -= value;
+                if (IoKHandler is null || IoKHandler.GetInvocationList().Length == 0) StopPolling();
+            }
+        }
+
+        private IoKMatch[] LastIoKMatches;
+        private Timer IokTimer;
 
         /// <summary>
         /// Create a new instance of the Phish.Report client.
@@ -95,13 +134,62 @@ namespace PhishReport
         /// <param name="page">The index of a page that you want to get.</param>
         /// <returns>An array of <see cref="IoKMatch"/> with the requested Indicator of Kit matches, ordered by their submission date.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task<IoKMatch[]> GetMatches(int page = 0)
+        public async Task<IoKMatch[]> GetIoKMatches(int page = 0)
         {
             if (page < 0) throw new ArgumentOutOfRangeException(nameof(page), "IoK page cannot be a negative value.");
 
             HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"iok/matches{(page == 0 ? "" : $"?page={page}")}");
 
             return (await res.Deseralize<IoKMatchContainer>()).Matches;
+        }
+
+        /// <summary>
+        /// Start polling Indicator of Kit for new matches.
+        /// </summary>
+        private async void StartPolling()
+        {
+            if (IokTimer is null)
+            {
+                IokTimer = new()
+                {
+                    Interval = IoKPollInterval
+                };
+
+                IokTimer.Elapsed += async (o, e) => await PollIoK();
+            }
+
+            IokTimer.Start();
+
+            LastIoKMatches = await GetIoKMatches();
+        }
+
+        /// <summary>
+        /// Stop polling Indicator of Kit for new matches.
+        /// </summary>
+        private void StopPolling()
+        {
+            if (IokTimer is null) return;
+
+            IokTimer.Stop();
+            LastIoKMatches = null;
+        }
+
+        /// <summary>
+        /// Poll Indicator of Kit to find new Indicator of Kit matches and trigger event handlers.
+        /// </summary>
+        private async Task PollIoK()
+        {
+            IoKMatch[] found;
+            IoKMatch[] matches = await GetIoKMatches();
+
+            if (LastIoKMatches is null) found = matches;
+            else found = matches.Where(match => LastIoKMatches.All(last => match.UrlscanUUID != last.UrlscanUUID)).ToArray();
+
+            LastIoKMatches = matches;
+
+            found = found.OrderBy(match => LowPriorityIndicators.Contains(match.IndicatorId)).ToArray();
+
+            foreach (IoKMatch match in found) IoKHandler.Invoke(this, match); 
         }
     }
 }

@@ -48,13 +48,24 @@ PhishingTakedown takedown2 = await phish.GetTakedown("case_4tmKtcajnzj");
 
 ### Retrieving the latest [Indicator of Kit](https://phish.report/IOK/) matches
 ```csharp
-IoKMatch[] matches = await phish.GetMatches();
+IoKMatch[] matches = await phish.GetIoKMatches();
+```
+
+### Processing [Indicator of Kit](https://phish.report/IOK/) matches in real time
+```csharp
+phish.IoKMatched += (sender, match) =>
+{
+    Console.WriteLine($"{match.Url} just matched {match.IndicatorId}");
+};
 ```
 
 ## Available Methods
 - Task\<PhishingTakedown> **CreateTakedown**(string url)
 - Task\<PhishingTakedown> **GetTakedown**(string id)
-- Task\<IoKMatch[]> **GetMatches**(int page = 0)
+- Task\<IoKMatch[]> **GetIoKMatches**(int page = 0)
+
+## Available Events
+- EventHandler\<IoKMatch> IoKMatched
 
 ## Resources
 Website: https://phish.report

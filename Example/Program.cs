@@ -23,14 +23,21 @@ namespace PhishReport
             Console.WriteLine($"URL: {takedown1.Url}");
   
             Console.WriteLine($"> Getting a phishing takedown");
-            PhishingTakedown takedown2 = await phish.GetTakedown("case_4kr52xX9zZA");
+            PhishingTakedown takedown2 = await phish.GetTakedown("case_4ExZCRk3PAh");
             Console.WriteLine($"ID: {takedown2.Id}");
             Console.WriteLine($"URL: {takedown2.Url}");
 
             Console.WriteLine($"> Getting the latest Indicator of Kit (IoK) matches");
-            IoKMatch[] matches = await phish.GetMatches();
+            IoKMatch[] matches = await phish.GetIoKMatches();
             Console.WriteLine($"Received {matches.Length} matches from the following indicators: {string.Join(", ", matches.Select(x => x.IndicatorId).Distinct())}");
 
+            Console.WriteLine("> Polling for new Indicator of Kit (IoK) matches");
+            phish.IoKMatched += (sender, match) =>
+            {
+                Console.WriteLine($"{match.IndicatorId} match on {match.Url}, source: https://urlscan.io/result/{match.UrlscanUUID}/");
+            };
+
+            Console.WriteLine();
             Console.WriteLine("Demo finished");
             Console.ReadKey();
         }

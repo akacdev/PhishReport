@@ -4,9 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <PackageId>PhishReport</PackageId>
     <Product>PhishReport</Product>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0</AssemblyVersion>
-    <FileVersion>1.0.0</FileVersion>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0</AssemblyVersion>
+    <FileVersion>1.1.0</FileVersion>
     <Authors>akac</Authors>
     <Company>akac</Company>
     <Description>An async C# library for interacting with the Phish.Report, Indicator of Kit and detection beta APIs.</Description>
