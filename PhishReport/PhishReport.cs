@@ -3,51 +3,32 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace PhishReport
 {
     /// <summary>
-    /// The main class for interacting with the Phish.Report APIs.
+    /// The primary class for interacting with Phish.Report APIs.
     /// </summary>
     public class PhishReportClient
     {
         /// <summary>
-        /// The current version of the API.
-        /// </summary>
-        public const int Version = 0;
-        /// <summary>
-        /// The base URL for the API.
-        /// </summary>
-        public static readonly string BaseUrl = $"https://phish.report/api/v{Version}/";
-        /// <summary>
         /// The base URI for the API.
         /// </summary>
-        public static readonly Uri BaseUri = new(BaseUrl);
-        /// <summary>
-        /// How often Indicator of Kit matches should be polled for changes.
-        /// </summary>
-        public const int IoKPollInterval = 1000 * 60;
-        /// <summary>
-        /// Low priority Indicators of Kit.
-        /// </summary>
-        public static readonly string[] LowPriorityIndicators = new string[]
-        {
-            "hex-encoded-body",
-            "base64-encoded-body",
-            "httrack",
-            "recaptcha",
-            "webscrapbook-cloner",
-            "savepage-we"
-        };
+        public static readonly Uri BaseUri = new($"https://phish.report/api/v{Constants.Version}/");
 
-        private readonly HttpClientHandler HttpHandler = new()
+        private static readonly HttpClientHandler HttpHandler = new()
         {
             AutomaticDecompression = DecompressionMethods.All,
             AllowAutoRedirect = false
         };
 
-        private readonly HttpClient Client;
+        private readonly HttpClient Client = new(HttpHandler)
+        {
+            DefaultRequestVersion = new Version(2, 0),
+            BaseAddress = BaseUri,
+            Timeout = TimeSpan.FromMinutes(1)
+        };
 
         private EventHandler<IoKMatch> IoKHandler;
         /// <summary>
@@ -78,13 +59,6 @@ namespace PhishReport
         public PhishReportClient(string key)
         {
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "API key is null or empty.");
-
-            Client = new(HttpHandler)
-            {
-                DefaultRequestVersion = new Version(2, 0),
-                BaseAddress = BaseUri,
-                Timeout = TimeSpan.FromMinutes(1)
-            };
 
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("Phish.Report C# Client - actually-akac/PhishReport");
@@ -152,7 +126,7 @@ namespace PhishReport
             {
                 IokTimer = new()
                 {
-                    Interval = IoKPollInterval
+                    Interval = Constants.IoKPollInterval
                 };
 
                 IokTimer.Elapsed += async (o, e) => await PollIoK();
@@ -187,7 +161,7 @@ namespace PhishReport
 
             LastIoKMatches = matches;
 
-            found = found.OrderBy(match => LowPriorityIndicators.Contains(match.IndicatorId)).ToArray();
+            found = found.OrderBy(match => Constants.LowPriorityIndicators.Contains(match.IndicatorId)).ToArray();
 
             foreach (IoKMatch match in found) IoKHandler.Invoke(this, match); 
         }

@@ -1,24 +1,37 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <!--Basic Information-->
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <PackageId>PhishReport</PackageId>
     <Product>PhishReport</Product>
-    <Version>1.1.0</Version>
-    <AssemblyVersion>1.1.0</AssemblyVersion>
-    <FileVersion>1.1.0</FileVersion>
     <Authors>akac</Authors>
     <Company>akac</Company>
     <Description>An async C# library for interacting with the Phish.Report, Indicator of Kit and detection beta APIs.</Description>
     <PackageTags>phish-report; phishreport; phish; phishing; whaling; smishing; abuse; report; reporting; ioc; cybersec; reporting; abuse; anti-abuse; takedown; attack; safebrowsing; safe-browsing; blacklist</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+
+    <!--Version-->
+    <Version>1.1.1</Version>
+    <AssemblyVersion>1.1.1</AssemblyVersion>
+    <FileVersion>1.1.1</FileVersion>
+
+    <!--Github-->
     <PackageProjectUrl>https://github.com/actually-akac/PhishReport</PackageProjectUrl>
     <RepositoryUrl>https://github.com/actually-akac/PhishReport</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>icon.png</PackageIcon>
-    <NeutralLanguage>en</NeutralLanguage>
-    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!--Compiler Options-->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!--Miscellaneous-->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -30,11 +43,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="icon.png">
+    <None Include="icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Update="README_NuGet.md">
+    <None Include="README_NuGet.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

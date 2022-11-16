@@ -4,30 +4,38 @@
 
 An async C# library for interacting with the Phish.Report, Indicator of Kit and detection beta APIs.
 
-
 > **Warning**
+
 > The Phish.Report API is still under development, so in the event that you start experiencing unexpected errors, first check if there's an update available or raise an issue in this repository.
 
 ## Usage
-Available on NuGet as `PhishReport`, methods can be found under the class `PhishReportClient`.
+Provides an easy interface for interacting with the Phish.Report APIs.
 
-You can create your API key here: https://phish.report/user
+You can create and track phishing takedowns and work with the [Indicator of Kit (IOK)](https://phish.report/IOK) platform.
 
-https://www.nuget.org/packages/PhishReport
+API keys are required to use the API. Create one at: https://phish.report/user
+
+To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
+```rust
+dotnet add package PhishReport
+```
+
+For the primary classes to become available, import the used namespace.
+```csharp
+using PhishReport;
+```
+
+Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Features
-- Made with **.NET 6**
+- Built for **.NET 6** and **.NET 7**
 - Fully **async**
-- Full coverage of the current **beta API**
-- Deep **documentation**
+- Coverage of the current **beta API**
+- Extensive **XML documentation**
 - **No external dependencies** (uses integrated HTTP and JSON)
 - Create phishing takedowns, fetch existing cases or process **Indicator of Kit** matches.
 - **Custom exceptions** (`PhishReportException`) for advanced catching
 - Automatic request retries
-- Example project to demonstrate all capabilities of the library
-
-## Example
-Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Code Samples
 
@@ -50,7 +58,6 @@ PhishingTakedown takedown2 = await phish.GetTakedown("case_4tmKtcajnzj");
 ```csharp
 IoKMatch[] matches = await phish.GetIoKMatches();
 ```
-
 ### Processing [Indicator of Kit](https://phish.report/IOK/) matches in real time
 ```csharp
 phish.IoKMatched += (sender, match) =>
@@ -68,6 +75,5 @@ phish.IoKMatched += (sender, match) =>
 - EventHandler\<IoKMatch> IoKMatched
 
 ## Resources
-Website: https://phish.report
-
-Indicator of Kit: https://phish.report/IOK/, https://github.com/phish-report/IOK
+- Website: https://phish.report<br/>
+- Indicator of Kit: https://phish.report/IOK/, https://github.com/phish-report/IOK

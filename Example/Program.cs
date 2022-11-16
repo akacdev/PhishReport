@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using PhishReport;
 
-namespace PhishReport
+namespace Example
 {
     public static class Program
     {

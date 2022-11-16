@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -23,7 +24,7 @@ namespace PhishReport
             string url,
             object obj,
             HttpStatusCode target = HttpStatusCode.OK)
-        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json"), target);
+        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, Constants.JsonContentType), target);
 
         public static async Task<HttpResponseMessage> Request
         (
@@ -31,8 +32,7 @@ namespace PhishReport
             HttpMethod method,
             string url,
             HttpContent content = null,
-            HttpStatusCode target = HttpStatusCode.OK,
-            string sid = null)
+            HttpStatusCode target = HttpStatusCode.OK)
         {
             int retries = 0;
 
@@ -56,7 +56,7 @@ namespace PhishReport
 
                         long unix = long.Parse(header);
 
-                        DateTime date = unix.ToDateTime();
+                        DateTime date = unix.ToDate();
                         TimeSpan remaining = date - DateTime.Now;
 
                         await Task.Delay(((int)remaining.TotalMilliseconds) + ExtraDelay);
@@ -87,16 +87,19 @@ namespace PhishReport
 
         public static async Task<T> Deseralize<T>(this HttpResponseMessage res, JsonSerializerOptions options = null)
         {
-            string json = await res.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(json)) throw new PhishReportException("Response content is empty, can't parse as JSON.");
+            Stream stream = await res.Content.ReadAsStreamAsync();
+            if (stream.Length == 0) throw new PhishReportException("Response content is empty, can't parse as JSON.");
 
             try
             {
-                return JsonSerializer.Deserialize<T>(json, options);
+                return await JsonSerializer.DeserializeAsync<T>(stream, options);
             }
             catch (Exception ex)
             {
-                throw new PhishReportException($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nJSON preview: {json[..Math.Min(json.Length, PreviewMaxLength)]}");
+                using StreamReader sr = new(stream);
+                string text = await sr.ReadToEndAsync();
+
+                throw new PhishReportException($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nPreview: {text[..Math.Min(text.Length, PreviewMaxLength)]}");
             }
         }
     }
