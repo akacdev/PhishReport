@@ -10,7 +10,7 @@
     <Description>An async C# library for interacting with the Phish.Report, Indicator of Kit and detection beta APIs.</Description>
     <PackageTags>phish-report; phishreport; phish; phishing; whaling; smishing; abuse; report; reporting; ioc; cybersec; reporting; abuse; anti-abuse; takedown; attack; safebrowsing; safe-browsing; blacklist</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+    <PackageReadmeFile>NuGet.md</PackageReadmeFile>
 
     <!--Version-->
     <Version>1.1.1</Version>
