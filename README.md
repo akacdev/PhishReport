@@ -12,8 +12,10 @@
 > The Phish.Report API is still under development, so in the event that you start experiencing unexpected errors, first check if there's an update available or raise an issue in this repository.
 
 ## Usage
-Provides an easy interface for interacting with the Phish.Report APIs.<br>
-You can create and track phishing takedowns and work with the [Indicator of Kit (IOK)](https://phish.report/IOK) platform.<br>
+Provides an easy interface for interacting with the Phish.Report APIs.
+
+You can create and track phishing takedowns and work with the [Indicator of Kit (IOK)](https://phish.report/IOK) platform.
+
 API keys are required to use the API. Create one at: https://phish.report/user
 
 To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
@@ -76,5 +78,5 @@ phish.IoKMatched += (sender, match) =>
 - EventHandler\<IoKMatch> IoKMatched
 
 ## Resources
-- Website: https://phish.report<br/>
+- Website: https://phish.report
 - Indicator of Kit: https://phish.report/IOK/, https://github.com/phish-report/IOK

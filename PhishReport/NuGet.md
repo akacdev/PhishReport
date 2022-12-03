@@ -75,5 +75,5 @@ phish.IoKMatched += (sender, match) =>
 - EventHandler\<IoKMatch> IoKMatched
 
 ## Resources
-- Website: https://phish.report<br/>
+- Website: https://phish.report
 - Indicator of Kit: https://phish.report/IOK/, https://github.com/phish-report/IOK
