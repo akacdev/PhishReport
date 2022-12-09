@@ -19,21 +19,29 @@ namespace Example
             PhishReportClient phish = new(key);
 
             Console.WriteLine($"> Starting a phishing takedown");
-            PhishingTakedown takedown1 = await phish.CreateTakedown("https://seowqpeoqwakfd425.ml/dssdfds-fsdfsdf0s-df0ds0f0dsdfsdd0f0s-df0dfgdd8658/");
+            PhishingTakedown takedown1 = await phish.CreateTakedown("https://alpsautorepairv.ml/?gclid=EAIaIQobChMIsfmc__Ds-wIVSOHICh3oGwtsEAAYASAAEgIxmPD_BwE");
             Console.WriteLine($"ID: {takedown1.Id}");
             Console.WriteLine($"URL: {takedown1.Url}");
-  
+
+            Console.WriteLine();
             Console.WriteLine($"> Getting a phishing takedown");
             PhishingTakedown takedown2 = await phish.GetTakedown("case_4ExZCRk3PAh");
             Console.WriteLine($"ID: {takedown2.Id}");
             Console.WriteLine($"URL: {takedown2.Url}");
 
-            Console.WriteLine($"> Getting the latest Indicator of Kit (IoK) matches");
-            IoKMatch[] matches = await phish.GetIoKMatches();
+            Console.WriteLine();
+            Console.WriteLine($"> Getting the latest Indicator of Kit (IOK) matches");
+            IokMatch[] matches = await phish.GetIokMatches();
             Console.WriteLine($"Received {matches.Length} matches from the following indicators: {string.Join(", ", matches.Select(x => x.IndicatorId).Distinct())}");
 
-            Console.WriteLine("> Polling for new Indicator of Kit (IoK) matches");
-            phish.IoKMatched += (sender, match) =>
+            Console.WriteLine();
+            Console.WriteLine($"> Getting IOK matches of a scan");
+            string[] scanMatches = await phish.GetIokMatches("4a0809fd-c30c-4d29-9c72-660980e53860");
+            Console.WriteLine($"Scan matches the following indicators ({scanMatches.Length}): {string.Join(", ", scanMatches)}");
+
+            Console.WriteLine();
+            Console.WriteLine("> Polling for new Indicator of Kit (IOK) matches (on 1 minute intervals)");
+            phish.IokMatched += (sender, match) =>
             {
                 Console.WriteLine($"{match.IndicatorId} match on {match.Url}, source: https://urlscan.io/result/{match.UrlscanUUID}/");
             };

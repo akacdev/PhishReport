@@ -13,9 +13,9 @@
     <PackageReadmeFile>NuGet.md</PackageReadmeFile>
 
     <!--Version-->
-    <Version>1.1.1</Version>
-    <AssemblyVersion>1.1.1</AssemblyVersion>
-    <FileVersion>1.1.1</FileVersion>
+    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.0</AssemblyVersion>
+    <FileVersion>1.2.0</FileVersion>
 
     <!--Github-->
     <PackageProjectUrl>https://github.com/actually-akac/PhishReport</PackageProjectUrl>
@@ -35,11 +35,11 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;1591</NoWarn>
+    <NoWarn>1701;1702;1591;SYSLIB1045</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;1591</NoWarn>
+    <NoWarn>1701;1702;1591;SYSLIB1045</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

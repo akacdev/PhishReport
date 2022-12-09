@@ -49,33 +49,35 @@ PhishReportClient phish = new("API KEY");
 
 ### Creating a new phishing takedown
 ```csharp
-PhishingTakedown takedown1 = await phish.CreateTakedown("https://seowqpeoqwakfd425.ml/dssdfds-fsdfsdf0s-df0ds0f0dsdfsdd0f0s-df0dfgdd8658/");
+PhishingTakedown takedown1 = await phish.CreateTakedown("https://alpsautorepairv.ml/?gclid=EAIaIQobChMIsfmc__Ds-wIVSOHICh3oGwtsEAAYASAAEgIxmPD_BwE");
 ```
 
 ### Retrieving an existing phishing takedown by its ID
 ```csharp
-PhishingTakedown takedown2 = await phish.GetTakedown("case_4tmKtcajnzj");
+PhishingTakedown takedown2 = await phish.GetTakedown("case_4ExZCRk3PAh");
 ```
 
 ### Retrieving the latest [Indicator of Kit](https://phish.report/IOK/) matches
 ```csharp
-IoKMatch[] matches = await phish.GetIoKMatches();
+IokMatch[] matches = await phish.GetIokMatches();
 ```
+
 ### Processing [Indicator of Kit](https://phish.report/IOK/) matches in real time
 ```csharp
-phish.IoKMatched += (sender, match) =>
+phish.IokMatched += (sender, match) =>
 {
-    Console.WriteLine($"{match.Url} just matched {match.IndicatorId}");
+	Console.WriteLine($"{match.IndicatorId} match on {match.Url}, source: https://urlscan.io/result/{match.UrlscanUUID}/");
 };
 ```
 
 ## Available Methods
 - Task\<PhishingTakedown> **CreateTakedown**(string url)
 - Task\<PhishingTakedown> **GetTakedown**(string id)
-- Task\<IoKMatch[]> **GetIoKMatches**(int page = 0)
+- Task\<IokMatch[]> **GetIokMatches**(int page = 1)
+- Task\<string[]> **GetIokMatches**(string uuid)
 
 ## Available Events
-- EventHandler\<IoKMatch> IoKMatched
+- EventHandler\<IokMatch> IokMatched
 
 ## Resources
 - Website: https://phish.report

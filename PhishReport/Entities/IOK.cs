@@ -6,7 +6,7 @@ namespace PhishReport
     /// An Indicator of Kit match.
     /// More Info: <a href="https://phish.report/IOK/">https://phish.report/IOK/</a>
     /// </summary>
-    public class IoKMatch
+    public class IokMatch
     {
         [JsonPropertyName("id")]
         public string IndicatorId { get; set; }
@@ -24,9 +24,9 @@ namespace PhishReport
     /// <summary>
     /// A container that holds Indicator of Kit matches.
     /// </summary>
-    public class IoKMatchContainer
+    public class IokMatchContainer
     {
         [JsonPropertyName("matches")]
-        public IoKMatch[] Matches { get; set; }
+        public IokMatch[] Matches { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,11 +13,6 @@ namespace PhishReport
     /// </summary>
     public class PhishReportClient
     {
-        /// <summary>
-        /// The base URI for the API.
-        /// </summary>
-        public static readonly Uri BaseUri = new($"https://phish.report/api/v{Constants.Version}/");
-
         private static readonly HttpClientHandler HttpHandler = new()
         {
             AutomaticDecompression = DecompressionMethods.All,
@@ -26,15 +22,15 @@ namespace PhishReport
         private readonly HttpClient Client = new(HttpHandler)
         {
             DefaultRequestVersion = new Version(2, 0),
-            BaseAddress = BaseUri,
+            BaseAddress = Constants.BaseUri,
             Timeout = TimeSpan.FromMinutes(1)
         };
 
-        private EventHandler<IoKMatch> IoKHandler;
+        private EventHandler<IokMatch> IoKHandler;
         /// <summary>
         /// Triggers whenever a new scan on Urlscan matches one of the kit indicators.
         /// </summary>
-        public event EventHandler<IoKMatch> IoKMatched
+        public event EventHandler<IokMatch> IokMatched
         {
             add
             {
@@ -48,7 +44,7 @@ namespace PhishReport
             }
         }
 
-        private IoKMatch[] LastIoKMatches;
+        private IokMatch[] LastIokMatches;
         private Timer IokTimer;
 
         /// <summary>
@@ -60,10 +56,10 @@ namespace PhishReport
         {
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "API key is null or empty.");
 
-            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("Phish.Report C# Client - actually-akac/PhishReport");
-            Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {key}");
+            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(Constants.AcceptEncoding);
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.UserAgent);
+            Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.JsonContentType);
+            Client.DefaultRequestHeaders.Authorization = new("Bearer", key);
         }
 
         /// <summary>
@@ -71,6 +67,7 @@ namespace PhishReport
         /// </summary>
         /// <param name="url">The full URL of the concerning website to report. Wherever possible, URLs will be automatically re-fanged.</param>
         /// <returns>An instance of <see cref="PhishingTakedown"/> with details about the new takedown.</returns>
+        /// <exception cref="PhishReportException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<PhishingTakedown> CreateTakedown(string url)
         {
@@ -91,6 +88,7 @@ namespace PhishReport
         /// </summary>
         /// <param name="id">The ID of the takedown, for example <c>case_4kr52xX9zZA</c>.</param>
         /// <returns>An instance of <see cref="PhishingTakedown"/> with details about the existing takedown.</returns>
+        /// <exception cref="PhishReportException"></exception>
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<PhishingTakedown> GetTakedown(string id)
         {
@@ -106,15 +104,56 @@ namespace PhishReport
         /// <para>Learn more about IoK: <a href="https://phish.report/IOK/">https://phish.report/IOK/</a></para>
         /// </summary>
         /// <param name="page">The index of a page that you want to get.</param>
-        /// <returns>An array of <see cref="IoKMatch"/> with the requested Indicator of Kit matches, ordered by their submission date.</returns>
+        /// <returns>An array of <see cref="IokMatch"/> with the requested Indicator of Kit matches, ordered by their submission date.</returns>
+        /// <exception cref="PhishReportException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task<IoKMatch[]> GetIoKMatches(int page = 0)
+        public async Task<IokMatch[]> GetIokMatches(int page = 1)
         {
             if (page < 0) throw new ArgumentOutOfRangeException(nameof(page), "IoK page cannot be a negative value.");
 
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"iok/matches{(page == 0 ? "" : $"?page={page}")}");
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"iok/matches{(page == 1 ? "" : $"?page={page}")}");
 
-            return (await res.Deseralize<IoKMatchContainer>()).Matches;
+            return (await res.Deseralize<IokMatchContainer>()).Matches;
+        }
+
+        /// <summary>
+        /// Get IOK matches of an existing Urlscan result.
+        /// <para>
+        ///     This currently isn't implemented in the main API, and instead makes use of the web API routes, that communicate with AJAX.<br/>
+        ///     In the event that this breaks, please capture the context and open an issue at the Github repository.
+        /// </para>
+        /// </summary>
+        /// <param name="uuid">The UUID of the Urlscan result to analyse.</param>
+        /// <returns>An array of <see cref="string"/> with the names of IOK rules that match this Urlscan result.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="PhishReportException"></exception>
+        public async Task<string[]> GetIokMatches(string uuid)
+        {
+            if (string.IsNullOrEmpty(uuid)) throw new ArgumentNullException(nameof(uuid), "UUID is null or empty.");
+
+            HttpResponseMessage res = await Client.Request(HttpMethod.Post, "IOK/analyse-urlscan", new FormUrlEncodedContent(new Dictionary<string, string>()
+            {
+                { "url", $"https://urlscan.io/result/{uuid}/" }
+            }), absoluteUrl: true);
+
+            string html = await res.Content.ReadAsStringAsync();
+            if (string.IsNullOrEmpty(html)) throw new PhishReportException("Returned AJAX HTML is null or empty.");
+
+            bool success = html.Contains("article class=\"message is-link\"");
+
+            string messageBodyFrom = "<div class=\"message-body\">";
+            string messageBodyTo = "</div>";
+
+            int messageBodyStart = html.IndexOf(messageBodyFrom);
+            if (messageBodyStart == -1) throw new PhishReportException("Missing 'message-body' start.");
+
+            int messageBodyEnd = html.IndexOf(messageBodyTo, messageBodyStart);
+            if (messageBodyEnd == -1) throw new PhishReportException("Missing 'message-body' end.");
+
+            string messageBody = html[(messageBodyStart + messageBodyFrom.Length)..messageBodyEnd].Trim();
+            if (!success) throw new PhishReportException($"Failed to analyse result for IOKs: {messageBody.HtmlDecode()}");
+
+            return Constants.IokIndicatorRegex.Matches(messageBody).Select(match => match.Groups.Values.Last().Value).ToArray();
         }
 
         /// <summary>
@@ -134,7 +173,7 @@ namespace PhishReport
 
             IokTimer.Start();
 
-            LastIoKMatches = await GetIoKMatches();
+            LastIokMatches = await GetIokMatches();
         }
 
         /// <summary>
@@ -145,7 +184,7 @@ namespace PhishReport
             if (IokTimer is null) return;
 
             IokTimer.Stop();
-            LastIoKMatches = null;
+            LastIokMatches = null;
         }
 
         /// <summary>
@@ -153,17 +192,17 @@ namespace PhishReport
         /// </summary>
         private async Task PollIoK()
         {
-            IoKMatch[] found;
-            IoKMatch[] matches = await GetIoKMatches();
+            IokMatch[] found;
+            IokMatch[] matches = await GetIokMatches();
 
-            if (LastIoKMatches is null) found = matches;
-            else found = matches.Where(match => LastIoKMatches.All(last => match.UrlscanUUID != last.UrlscanUUID)).ToArray();
+            if (LastIokMatches is null) found = matches;
+            else found = matches.Where(match => LastIokMatches.All(last => match.UrlscanUUID != last.UrlscanUUID)).ToArray();
 
-            LastIoKMatches = matches;
+            LastIokMatches = matches;
 
             found = found.OrderBy(match => Constants.LowPriorityIndicators.Contains(match.IndicatorId)).ToArray();
 
-            foreach (IoKMatch match in found) IoKHandler.Invoke(this, match); 
+            foreach (IokMatch match in found) IoKHandler.Invoke(this, match);
         }
     }
 }
