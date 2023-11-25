@@ -21,9 +21,8 @@ namespace PhishReport
 
         private readonly HttpClient Client = new(HttpHandler)
         {
-            DefaultRequestVersion = new Version(2, 0),
             BaseAddress = Constants.BaseUri,
-            Timeout = TimeSpan.FromMinutes(1)
+            DefaultRequestVersion = Constants.HttpVersion
         };
 
         private EventHandler<IokMatch> IoKHandler;
@@ -56,9 +55,9 @@ namespace PhishReport
         {
             if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "API key is null or empty.");
 
-            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(Constants.AcceptEncoding);
+            Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.UserAgent);
-            Client.DefaultRequestHeaders.Accept.ParseAdd(Constants.JsonContentType);
+            Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             Client.DefaultRequestHeaders.Authorization = new("Bearer", key);
         }
 
@@ -71,7 +70,7 @@ namespace PhishReport
         /// <exception cref="ArgumentNullException"></exception>
         public async Task<PhishingTakedown> CreateTakedown(string url)
         {
-            if (url is null) throw new ArgumentNullException(nameof(url), "URL to report is null or empty.");
+            if (url is null) throw new ArgumentNullException(nameof(url), "URL is null or empty.");
 
             CreateCaseParameters parameters = new()
             {
@@ -134,7 +133,7 @@ namespace PhishReport
             HttpResponseMessage res = await Client.Request(HttpMethod.Post, "IOK/analyse-urlscan", new FormUrlEncodedContent(new Dictionary<string, string>()
             {
                 { "url", $"https://urlscan.io/result/{uuid}/" }
-            }), absoluteUrl: true);
+            }), absolutePath: true);
 
             string html = await res.Content.ReadAsStringAsync();
             if (string.IsNullOrEmpty(html)) throw new PhishReportException("Returned AJAX HTML is null or empty.");

@@ -12,7 +12,7 @@ namespace PhishReport
         public string IndicatorId { get; set; }
 
         [JsonPropertyName("urlscanUUID")]
-        public string UrlscanUUID { get; set; }
+        public string UrlscanUuid { get; set; }
 
         [JsonPropertyName("url")]
         public string Url { get; set; }

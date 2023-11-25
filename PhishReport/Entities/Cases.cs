@@ -21,6 +21,15 @@ namespace PhishReport
     }
 
     /// <summary>
+    /// Parameters for creating a new case.
+    /// </summary>
+    public class CreateCaseParameters
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+    }
+
+    /// <summary>
     /// An action that can be performed by the user.
     /// </summary>
     public class PendingAction
