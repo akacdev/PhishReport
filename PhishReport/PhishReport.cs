@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Timer = System.Timers.Timer;
 
 namespace PhishReport
 {
@@ -24,27 +23,6 @@ namespace PhishReport
             BaseAddress = Constants.BaseUri,
             DefaultRequestVersion = Constants.HttpVersion
         };
-
-        private EventHandler<IokMatch> IoKHandler;
-        /// <summary>
-        /// Triggers whenever a new scan on Urlscan matches one of the kit indicators.
-        /// </summary>
-        public event EventHandler<IokMatch> IokMatched
-        {
-            add
-            {
-                IoKHandler += value;
-                if (IoKHandler.GetInvocationList().Length == 1) StartPolling();
-            }
-            remove
-            {
-                IoKHandler -= value;
-                if (IoKHandler is null || IoKHandler.GetInvocationList().Length == 0) StopPolling();
-            }
-        }
-
-        private IokMatch[] LastIokMatches;
-        private Timer IokTimer;
 
         /// <summary>
         /// Create a new instance of the Phish.Report client.
@@ -99,23 +77,6 @@ namespace PhishReport
         }
 
         /// <summary>
-        /// Get the Indicator of Kit matches for a specific page, the latest one is loaded by default.
-        /// <para>Learn more about IoK: <a href="https://phish.report/IOK/">https://phish.report/IOK/</a></para>
-        /// </summary>
-        /// <param name="page">The index of a page that you want to get.</param>
-        /// <returns>An array of <see cref="IokMatch"/> with the requested Indicator of Kit matches, ordered by their submission date.</returns>
-        /// <exception cref="PhishReportException"></exception>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task<IokMatch[]> GetIokMatches(int page = 1)
-        {
-            if (page < 0) throw new ArgumentOutOfRangeException(nameof(page), "IoK page cannot be a negative value.");
-
-            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"iok/matches{(page == 1 ? "" : $"?page={page}")}");
-
-            return (await res.Deseralize<IokMatchContainer>()).Matches;
-        }
-
-        /// <summary>
         /// Get IOK matches of an existing Urlscan result.
         /// <para>
         ///     This currently isn't implemented in the main API, and instead makes use of the web API routes, that communicate with AJAX.<br/>
@@ -153,55 +114,6 @@ namespace PhishReport
             if (!success) throw new PhishReportException($"Failed to analyse result for IOKs: {messageBody.HtmlDecode()}");
 
             return Constants.IokIndicatorRegex.Matches(messageBody).Select(match => match.Groups.Values.Last().Value).ToArray();
-        }
-
-        /// <summary>
-        /// Start polling Indicator of Kit for new matches.
-        /// </summary>
-        private async void StartPolling()
-        {
-            if (IokTimer is null)
-            {
-                IokTimer = new()
-                {
-                    Interval = Constants.IoKPollInterval
-                };
-
-                IokTimer.Elapsed += async (o, e) => await PollIoK();
-            }
-
-            IokTimer.Start();
-
-            LastIokMatches = await GetIokMatches();
-        }
-
-        /// <summary>
-        /// Stop polling Indicator of Kit for new matches.
-        /// </summary>
-        private void StopPolling()
-        {
-            if (IokTimer is null) return;
-
-            IokTimer.Stop();
-            LastIokMatches = null;
-        }
-
-        /// <summary>
-        /// Poll Indicator of Kit to find new Indicator of Kit matches and trigger event handlers.
-        /// </summary>
-        private async Task PollIoK()
-        {
-            IokMatch[] found;
-            IokMatch[] matches = await GetIokMatches();
-
-            if (LastIokMatches is null) found = matches;
-            else found = matches.Where(match => LastIokMatches.All(last => match.UrlscanUuid != last.UrlscanUuid)).ToArray();
-
-            LastIokMatches = matches;
-
-            found = found.OrderBy(match => Constants.LowPriorityIndicators.Contains(match.IndicatorId)).ToArray();
-
-            foreach (IokMatch match in found) IoKHandler.Invoke(this, match);
         }
     }
 }

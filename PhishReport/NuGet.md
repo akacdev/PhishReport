@@ -32,11 +32,12 @@ Need more examples? Under the `Example` directory you can find a working demo pr
 - Extensive **XML documentation**
 - **No external dependencies** (makes use of built-in `HttpClient` and `JsonSerializer`)
 - **Custom exceptions** (`PhishReportException`) for easy debugging
+- Example project to demonstrate all capabilities of the library
 
 ## Features
 - Create phishing takedowns
 - Fetch existing reported cases
-- Process newly created [Indicator of Kit](https://phish.report/IOK/) matches
+- Evaluate Urlscan results for [Indicator of Kit](https://phish.report/IOK/) matches
 
 ## Code Samples
 
