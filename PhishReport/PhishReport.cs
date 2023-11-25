@@ -195,7 +195,7 @@ namespace PhishReport
             IokMatch[] matches = await GetIokMatches();
 
             if (LastIokMatches is null) found = matches;
-            else found = matches.Where(match => LastIokMatches.All(last => match.UrlscanUUID != last.UrlscanUUID)).ToArray();
+            else found = matches.Where(match => LastIokMatches.All(last => match.UrlscanUuid != last.UrlscanUuid)).ToArray();
 
             LastIokMatches = matches;
 

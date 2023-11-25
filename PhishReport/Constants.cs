@@ -40,6 +40,7 @@ namespace PhishReport
             "savepage-we"
         };
 
-        public static readonly Regex IokIndicatorRegex = new(@"href=\""\/IOK\/indicators\/(.+)\"">", RegexOptions.Multiline | RegexOptions.Compiled);
+        private static readonly Regex Regex = new(@"href=\""\/IOK\/indicators\/(.+)\"">", RegexOptions.Multiline | RegexOptions.Compiled);
+        public static readonly Regex IokIndicatorRegex = Regex;
     }
 }
